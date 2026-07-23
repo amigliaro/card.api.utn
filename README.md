@@ -56,24 +56,73 @@ En Windows, usá `mvnw.cmd` en lugar de `./mvnw`.
 
 La configuración de la aplicación se encuentra en `src/main/resources`. Una configuración típica incluye:
 
-```yaml
-server:
-  port: 8080          # puerto de la API (ajustar según el entorno)
+```properties
+server.port=8081
+spring.application.name=card.api
+spring.datasource.url=jdbc:mysql://localhost:3306/utn
+spring.datasource.username=root
+spring.datasource.password=<tu_contraseña>
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
 
-spring:
-  application:
-    name: card-api
-  datasource:
-    url: jdbc:mysql://localhost:3306/card_db
-    username: <usuario>
-    password: <contraseña>
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+dolar.api.url=https://dolarapi.com/v1
 ```
 
-> Reemplazá las credenciales y la URL de conexión según tu entorno. Para los tests, la aplicación puede configurarse para usar H2 en memoria en lugar de MySQL.
+> ⚠️ Las credenciales de base de datos están actualmente hardcodeadas en `application.properties`. Se recomienda externalizarlas mediante variables de entorno o el Config Server (`config-repo.utn`) antes de subir el proyecto a un entorno compartido o productivo. Para los tests, la aplicación usa H2 en memoria en lugar de MySQL.
+
+## Endpoints
+
+Todos los endpoints de gestión de tarjetas están expuestos bajo el path base `/tarjetas`.
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/tarjetas` | Devuelve el listado completo de tarjetas registradas. |
+| `GET` | `/tarjetas/{idTarjeta}` | Devuelve una tarjeta puntual según su ID. Responde `404 Not Found` si no existe. |
+| `POST` | `/tarjetas` | Crea una nueva tarjeta a partir del cuerpo enviado en la request. |
+| `PUT` | `/tarjetas/{idTarjeta}` | Actualiza los datos de una tarjeta existente (actualización parcial de los campos enviados). Responde `404 Not Found` si no existe. |
+| `DELETE` | `/tarjetas/{idTarjeta}` | Elimina una tarjeta según su ID. Responde `404 Not Found` si no existe. |
+
+### Modelo `Card`
+
+El recurso `Card` (tabla `card`) contiene los siguientes campos:
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `cardId` | `Long` | Identificador único de la tarjeta (autogenerado). |
+| `marca` | `String` | Marca de la tarjeta (ej. Visa, Mastercard). |
+| `tipoTarjeta` | `String` | Tipo de tarjeta (ej. crédito, débito). |
+| `nroTarjeta` | `String` | Número de tarjeta. |
+| `fechaVencimiento` | `String` | Fecha de vencimiento de la tarjeta. |
+| `CVC` | `String` | Código de seguridad de la tarjeta. |
+| `limiteCredito` | `Double` | Límite de crédito asociado. |
+| `activa` | `Boolean` | Indica si la tarjeta está activa. |
+| `fechaCreacion` | `LocalDate` | Fecha de alta del registro. |
+| `fechaModificacion` | `LocalDate` | Fecha de la última modificación. |
+
+### Integración con servicio externo (cotización del dólar)
+
+El proyecto incluye un cliente **OpenFeign** (`DolarClient`) que consume la API pública [DolarApi](https://dolarapi.com) para obtener la cotización oficial del dólar (`GET /dolares/oficial`), configurable mediante la propiedad `dolar.api.url`.
+
+### Manejo de errores
+
+La API centraliza el manejo de excepciones mediante un `@RestControllerAdvice` que devuelve respuestas consistentes:
+
+| Excepción | Código HTTP | Cuándo ocurre |
+|---|---|---|
+| `NotFoundException` | `404 Not Found` | La tarjeta solicitada no existe. |
+| `ExternalApiException` | `503 Service Unavailable` | Falla la comunicación con un servicio externo (ej. la API del dólar). |
+| `Exception` (genérica) | `500 Internal Server Error` | Cualquier otro error no controlado. |
+
+Todas las respuestas de error siguen el formato:
+
+```json
+{
+  "codigo": 404,
+  "mensaje": "No se encontró la tarjeta solicitada"
+}
+```
 
 ## Documentación de la API (Swagger)
 
