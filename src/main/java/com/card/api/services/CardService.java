@@ -1,12 +1,15 @@
 package com.card.api.services;
 
+import com.card.api.dto.CardDTO;
 import com.card.api.exceptions.InternalServerErrorException;
 import com.card.api.exceptions.NotFoundException;
+import com.card.api.mappers.CardMapper;
 import com.card.api.models.Card;
 import com.card.api.repositories.CardRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,39 +17,34 @@ import java.util.Optional;
 public class CardService {
 
     private final CardRepository cardRepository;
+    private CardMapper cardMapper = new CardMapper();
 
     public CardService(CardRepository cardRepository) {
         this.cardRepository = cardRepository;
     }
 
 
-    public List<Card> getCard() {
+    public List<CardDTO> getCard() {
         try {
-
-            return cardRepository.findAll();
+            return CardMapper.cardToDTOList(cardRepository.findAll());
         } catch (InternalServerErrorException ex) {
             throw new InternalServerErrorException("Error al listar las tarjetas: " + ex.getMessage());
         }
     }
 
-    public Card getCardById(Long id) throws NotFoundException {
-        Optional<Card> auxCliente = cardRepository.findById(id);
-        if (auxCliente.isPresent()) {
-            return auxCliente.get();
-        } else {
-            throw new NotFoundException("No se encontró la tarjeta solicitada");
-        }
+    public CardDTO getCardById(Long id) throws NotFoundException {
+        return CardMapper.cardToDTO(cardRepository.findById(id).get());
     }
 
-    public Card insertCard(Card card) {
+    public CardDTO insertCard(Card card) {
         try {
-            return cardRepository.save(card);
+            return CardMapper.cardToDTO(cardRepository.save(card));
         } catch (InternalServerErrorException ex) {
             throw new InternalServerErrorException("Error al insertar una tarjeta: " + ex.getMessage());
         }
     }
 
-    public Card updateCard(Long idCard, Card card) {
+    public CardDTO updateCard(Long idCard, Card card) {
         Optional<Card> auxCard = cardRepository.findById(idCard);
 
         if (auxCard.isPresent()) {
@@ -57,12 +55,13 @@ public class CardService {
             if (card.getCVC() != null) auxCard.get().setCVC(card.getCVC());
             if (card.getLimiteCredito() != null) auxCard.get().setLimiteCredito(card.getLimiteCredito());
             card.setFechaModificacion(LocalDate.now());
+            card.setClienteId(auxCard.get().getClienteId());
 
         } else {
             throw new NotFoundException("No se encontró información para la tarjeta ingresada.");
         }
         try {
-            return cardRepository.save(auxCard.get());
+            return CardMapper.cardToDTO(cardRepository.save(auxCard.get()));
         } catch (InternalServerErrorException ex) {
             throw new InternalServerErrorException("Error al modificar una tarjeta: " + ex.getMessage());
         }
@@ -79,5 +78,10 @@ public class CardService {
         } else {
             throw new NotFoundException("No se encontró información para la tarjeta ingresada.");
         }
+    }
+
+    public List<CardDTO> getCardByCliente(Long idCliente) {
+        return CardMapper.cardToDTOList(cardRepository.findByClienteId(idCliente));
+
     }
 }

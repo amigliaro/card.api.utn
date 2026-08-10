@@ -1,5 +1,6 @@
 package com.card.api.controllers;
 
+import com.card.api.dto.CardDTO;
 import com.card.api.exceptions.NotFoundException;
 import com.card.api.models.Card;
 import com.card.api.services.CardService;
@@ -18,22 +19,22 @@ import java.util.List;
     }
 
     @GetMapping
-    public List<Card> getCards() {
+    public List<CardDTO> getCards() {
         return cardService.getCard();
     }
 
     @GetMapping("/{idTarjeta}")
-    public Card getCardById(@PathVariable Long idTarjeta) throws NotFoundException {
+    public CardDTO getCardById(@PathVariable Long idTarjeta) throws NotFoundException {
         return cardService.getCardById(idTarjeta);
     }
 
     @PostMapping
-    public Card insertTarjeta(@RequestBody Card card) {
+    public CardDTO insertTarjeta(@RequestBody Card card) {
         return cardService.insertCard(card);
     }
 
     @PutMapping("/{idTarjeta}")
-    public Card insertTarjeta(@PathVariable Long idTarjeta, @RequestBody Card card) {
+    public CardDTO insertTarjeta(@PathVariable Long idTarjeta, @RequestBody Card card) {
         return cardService.updateCard(idTarjeta, card);
     }
 
@@ -41,4 +42,10 @@ import java.util.List;
     public void deleteTarjeta(@PathVariable Long idTarjeta) {
         cardService.deleteCard(idTarjeta);
     }
+
+    @GetMapping("/cliente/{idCliente}")
+    public List<CardDTO> getCardByCliente(@PathVariable Long idCliente) {
+        return cardService.getCardByCliente(idCliente);
+    }
+
 }

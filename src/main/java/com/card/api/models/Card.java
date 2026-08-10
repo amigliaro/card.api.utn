@@ -30,4 +30,5 @@ public class Card {
     private Boolean activa;
     private LocalDate fechaCreacion;
     private LocalDate fechaModificacion;
+    private Long clienteId;
 }
