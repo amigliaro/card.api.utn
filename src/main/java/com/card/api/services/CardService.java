@@ -9,7 +9,6 @@ import com.card.api.repositories.CardRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +16,6 @@ import java.util.Optional;
 public class CardService {
 
     private final CardRepository cardRepository;
-    private CardMapper cardMapper = new CardMapper();
 
     public CardService(CardRepository cardRepository) {
         this.cardRepository = cardRepository;
@@ -33,18 +31,23 @@ public class CardService {
     }
 
     public CardDTO getCardById(Long id) throws NotFoundException {
-        return CardMapper.cardToDTO(cardRepository.findById(id).get());
+        Optional<Card> auxCard = cardRepository.findById(id);
+        if (auxCard.isPresent()) {
+            return CardMapper.cardToDTO(auxCard.get());
+        } else {
+            throw new NotFoundException("No se encontró el cliente solicitado");
+        }
     }
 
-    public CardDTO insertCard(Card card) {
+    public CardDTO insertCard(CardDTO card) {
         try {
-            return CardMapper.cardToDTO(cardRepository.save(card));
+            return CardMapper.cardToDTO(cardRepository.save(CardMapper.DTOtoCard(card)));
         } catch (InternalServerErrorException ex) {
             throw new InternalServerErrorException("Error al insertar una tarjeta: " + ex.getMessage());
         }
     }
 
-    public CardDTO updateCard(Long idCard, Card card) {
+    public CardDTO updateCard(Long idCard, CardDTO card) {
         Optional<Card> auxCard = cardRepository.findById(idCard);
 
         if (auxCard.isPresent()) {
@@ -54,8 +57,8 @@ public class CardService {
             if (card.getFechaVencimiento() != null) auxCard.get().setFechaVencimiento(card.getFechaVencimiento());
             if (card.getCVC() != null) auxCard.get().setCVC(card.getCVC());
             if (card.getLimiteCredito() != null) auxCard.get().setLimiteCredito(card.getLimiteCredito());
-            card.setFechaModificacion(LocalDate.now());
-            card.setClienteId(auxCard.get().getClienteId());
+            auxCard.get().setFechaModificacion(LocalDate.now());
+            auxCard.get().setClienteId(auxCard.get().getClienteId());
 
         } else {
             throw new NotFoundException("No se encontró información para la tarjeta ingresada.");

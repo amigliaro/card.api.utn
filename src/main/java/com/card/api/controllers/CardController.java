@@ -29,12 +29,12 @@ import java.util.List;
     }
 
     @PostMapping
-    public CardDTO insertTarjeta(@RequestBody Card card) {
+    public CardDTO insertTarjeta(@RequestBody CardDTO card) {
         return cardService.insertCard(card);
     }
 
     @PutMapping("/{idTarjeta}")
-    public CardDTO insertTarjeta(@PathVariable Long idTarjeta, @RequestBody Card card) {
+    public CardDTO insertTarjeta(@PathVariable Long idTarjeta, @RequestBody CardDTO card) {
         return cardService.updateCard(idTarjeta, card);
     }
 

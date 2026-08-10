@@ -14,4 +14,5 @@ public class CardDTO {
     private String fechaVencimiento;
     private String CVC;
     private Double limiteCredito;
+    private Long idCliente;
 }
