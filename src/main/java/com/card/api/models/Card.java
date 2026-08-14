@@ -32,6 +32,4 @@ public class Card {
     private LocalDate fechaModificacion;
     private Long clienteId;
 
-    public Card(String marca, String tipoTarjeta, String nroTarjeta, String fechaVencimiento, String cvc, Double limiteCredito, boolean b, LocalDate now, LocalDate now1, Long idCliente) {
-    }
 }

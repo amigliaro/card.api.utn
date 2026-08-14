@@ -21,6 +21,15 @@ public class CardMapper {
 
     public static Card DTOtoCard(CardDTO cardDTO) {
         if (cardDTO == null) return null;
-        return new Card(cardDTO.getMarca(), cardDTO.getTipoTarjeta(), cardDTO.getNroTarjeta(), cardDTO.getFechaVencimiento(), cardDTO.getCVC(), cardDTO.getLimiteCredito(), true, LocalDate.now(), LocalDate.now(), cardDTO.getIdCliente());
+        return Card.builder().marca(cardDTO.getMarca())
+                .tipoTarjeta(cardDTO.getTipoTarjeta())
+                .nroTarjeta(cardDTO.getNroTarjeta())
+                .fechaVencimiento(cardDTO.getFechaVencimiento())
+                .CVC(cardDTO.getCVC())
+                .limiteCredito(cardDTO.getLimiteCredito())
+                .activa(true)
+                .fechaCreacion(LocalDate.now())
+                .fechaModificacion(LocalDate.now())
+                .clienteId(cardDTO.getIdCliente()).build();
     }
 }
