@@ -10,7 +10,14 @@ import java.util.stream.Collectors;
 public class CardMapper {
     public static CardDTO cardToDTO(Card card) {
         if (card == null) return null;
-        return new CardDTO(card.getMarca(), card.getTipoTarjeta(), card.getNroTarjeta(), card.getFechaVencimiento(), card.getCVC(), card.getLimiteCredito(), null);
+        return CardDTO.builder()
+                .marca(card.getMarca())
+                .tipoTarjeta(card.getTipoTarjeta())
+                .nroTarjeta(card.getNroTarjeta())
+                .fechaVencimiento(card.getFechaVencimiento())
+                .CVC(card.getCVC())
+                .limiteCredito(card.getLimiteCredito())
+                .build();
     }
 
     public static List<CardDTO> cardToDTOList(List<Card> cards) {
